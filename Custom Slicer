@@ -1,0 +1,81 @@
+**********  Custom Date Periods( for slicer in Year, Quater , MOnth , YTD , QTD) =
+-------- Note - This will create a Table "Custom Date Periods  with column Date ,Level , Name and Name Sort  , and using Level Column we will create Slicer of Year , Quater , Month , YTD and QTD 
+
+VAR Dates_YTD = DATESYTD ( factsales(DateKey))
+VAR Dates_QTD = DATESQTD ( factsales(DateKey))
+
+UNION(
+SELECTCOLUMNS (
+dimDate,
+"Date", dimDate[Date],
+"Level", "Year",
+"Level Sort", 1,
+"Name", YEAR(dimDate[Date]),
+"Name Sort", YEAR(dimDate[Date])
+),
+
+SELECTCOLUMNS (
+dimDate,
+"Date", dimDate[Date],
+"Level", "Quarter",
+"Level Sort", 2,
+"Name", FORMAT (dimDate[Date], "\QQ"),
+"Name Sort", QUARTER(dimDate[Date])
+),
+
+SELECTCOLUMNS (
+dimDate,
+"Date", dimDate[Date],
+"Level", "Month",
+"Level Sort", 3,
+"Name", FORMAT(dimDate[Date],"MMM"),
+"Name Sort", MONTH(dimDate[Date])
+),
+SELECTCOLUMNS(
+filter(dimDate,dimDate[Date] IN Dates_YTD),
+"Date",dimDate[Date],
+"Level","YTD",
+"Level Sort", 3,
+"Name", FORMAT(dimDate[Date],"MMM"),
+"Name Sort", MONTH(dimDate[Date])
+),
+
+SELECTCOLUMNS(
+filter( dimdate, dimDate[Date] IN Dates_QTD),
+"Date",dimDate[Date],
+"level", "QTD",
+"Name",FORMAT ( dimdate[Date] , "MMM") ,
+"Name Sort",Month(dimDate[Date])
+))
+
+
+********** Custom Data Levels=
+---------Note - This will use to Create a table "Custom Product Hirerchy" with column ProductKey , Level , Level Sort and Name ,  and using level column  we will create custom Slicer of Category ,SubCategory , Product and Top 10 Products
+
+UNION(
+SelectColumns(
+dimProducts,
+"ProductKey",dimProducts[ProductKey],
+"Level","Category",
+"Name" , dimProducts[Category]
+),
+
+SelectCoulumns(
+dimProducts,
+"ProductKey",dimProduct[ProductKey],
+"Level","SubCategory",
+"Name", dimProducts[SubCategory]
+),
+SelectColumns(
+dimProducts,
+"ProductKey",dimProducts[ProductKey],
+"Level","Products",
+"Name ",dimProducts[Product]
+),
+SelectColumns(
+filter(dimProducts ,Rankx(dimproduct , dimProduct[Sales Amount])<=10),
+"ProductKey",dimProducts[ProductKey],
+"Level", "Top10_ Products",
+"Name" , dimProducts[Product]
+)
+)
